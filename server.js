@@ -1,86 +1,75 @@
-import Anthropic from "@anthropic-ai/sdk";
 import express from "express";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
-const client = new Anthropic();
 
 app.use(express.json());
 app.use(express.static(join(__dirname, "public")));
 
-const JOKE_TYPE_DESCRIPTIONS = {
-  pun: "a clever wordplay pun",
-  "knock-knock": "a knock-knock joke",
-  "one-liner": "a punchy one-liner",
-  classic: "a classic dad joke setup-and-punchline",
-  question: "a question-and-answer style joke",
-  "groan-worthy": "an especially groan-worthy, terrible joke",
+const TYPE_TO_CATEGORY = {
+  pun: "Pun",
+  "knock-knock": "Misc",
+  "one-liner": "Any",
+  classic: "Misc",
+  question: "Any",
+  "groan-worthy": "Pun",
 };
 
-const AGE_GROUP_DESCRIPTIONS = {
-  kids: "young children aged 5-8 — keep it simple, clean, and silly",
-  tweens: "tweens aged 9-12 — slightly more clever, still totally clean",
-  teens: "teenagers — can be a bit wittier and self-aware",
-  adults: "adults — can reference everyday adult life situations",
-  "all-ages": "the whole family — universally funny across all ages",
+const TYPE_TO_JOKE_TYPE = {
+  "one-liner": "single",
+  question: "twopart",
 };
 
-const LENGTH_DESCRIPTIONS = {
-  short: "Keep it very short — 1-3 lines maximum",
-  medium: "Medium length — a complete setup and punchline, maybe 3-5 lines",
-  long: "Make it longer — build up the story with extra detail, 5-8 lines",
+const AGE_TO_BLACKLIST = {
+  kids: "nsfw,racist,sexist,explicit,political,dark",
+  tweens: "nsfw,racist,sexist,explicit,political",
+  teens: "nsfw,racist,sexist,explicit",
+  adults: "racist,sexist",
+  "all-ages": "nsfw,racist,sexist,explicit,political,dark",
+};
+
+const LENGTH_TO_TYPE = {
+  short: "single",
+  long: "twopart",
+  medium: null,
 };
 
 app.post("/api/joke", async (req, res) => {
-  const {
-    jokeType = "classic",
-    ageGroup = "all-ages",
-    length = "medium",
-  } = req.body;
+  const { jokeType = "classic", ageGroup = "all-ages", length = "medium" } = req.body;
 
-  const jokeTypeDesc =
-    JOKE_TYPE_DESCRIPTIONS[jokeType] || JOKE_TYPE_DESCRIPTIONS.classic;
-  const ageGroupDesc =
-    AGE_GROUP_DESCRIPTIONS[ageGroup] || AGE_GROUP_DESCRIPTIONS["all-ages"];
-  const lengthDesc = LENGTH_DESCRIPTIONS[length] || LENGTH_DESCRIPTIONS.medium;
+  const category = TYPE_TO_CATEGORY[jokeType] || "Misc";
+  const blacklist = AGE_TO_BLACKLIST[ageGroup] || AGE_TO_BLACKLIST["all-ages"];
 
-  const prompt = `Tell me ${jokeTypeDesc}.
+  // jokeType overrides take precedence; length fills in when type has no preference
+  const forcedType = TYPE_TO_JOKE_TYPE[jokeType];
+  const lengthType = LENGTH_TO_TYPE[length];
+  const jokeTypeParam = forcedType || lengthType;
 
-The joke is for ${ageGroupDesc}.
-${lengthDesc}.
-
-Deliver only the joke itself — no intro like "Sure!" or "Here's a joke:", and no commentary after. Just the joke, formatted naturally.`;
-
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache");
-  res.setHeader("Connection", "keep-alive");
+  const url = new URL(`https://v2.jokeapi.dev/joke/${category}`);
+  url.searchParams.set("blacklistFlags", blacklist);
+  if (jokeTypeParam) url.searchParams.set("type", jokeTypeParam);
 
   try {
-    const stream = client.messages.stream({
-      model: "claude-opus-4-7",
-      max_tokens: 512,
-      messages: [{ role: "user", content: prompt }],
-    });
+    const response = await fetch(url.toString());
+    if (!response.ok) throw new Error(`JokeAPI error: ${response.status}`);
 
-    for await (const event of stream) {
-      if (
-        event.type === "content_block_delta" &&
-        event.delta.type === "text_delta"
-      ) {
-        res.write(`data: ${JSON.stringify({ text: event.delta.text })}\n\n`);
-      }
+    const data = await response.json();
+
+    if (data.error) throw new Error(data.message || "JokeAPI returned an error");
+
+    let joke;
+    if (data.type === "twopart") {
+      joke = `${data.setup}\n\n${data.delivery}`;
+    } else {
+      joke = data.joke;
     }
 
-    res.write("data: [DONE]\n\n");
-    res.end();
+    res.json({ joke });
   } catch (err) {
-    console.error("Claude API error:", err.message);
-    res.write(
-      `data: ${JSON.stringify({ error: "Failed to generate joke. Check your ANTHROPIC_API_KEY." })}\n\n`
-    );
-    res.end();
+    console.error("JokeAPI error:", err.message);
+    res.status(500).json({ error: "Failed to fetch a joke. Please try again." });
   }
 });
 

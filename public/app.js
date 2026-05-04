@@ -59,7 +59,7 @@ generateBtn.addEventListener("click", generateJoke);
 anotherBtn.addEventListener("click", generateJoke);
 
 copyBtn.addEventListener("click", () => {
-  const text = jokeText.textContent.replace(/\s*$/, ""); // strip trailing cursor char
+  const text = jokeText.textContent;
   navigator.clipboard.writeText(text).then(() => {
     copyBtn.textContent = "Copied!";
     setTimeout(() => {
@@ -79,10 +79,8 @@ async function generateJoke() {
   state.isGenerating = true;
   setGenerating(true);
   hideError();
-
-  // Reset card
   jokeCard.hidden = true;
-  jokeText.innerHTML = "";
+  jokeText.textContent = "";
   jokeDecoration.textContent = pickEmoji(state.jokeType);
 
   try {
@@ -96,57 +94,17 @@ async function generateJoke() {
       }),
     });
 
-    if (!res.ok) {
-      throw new Error(`Server error: ${res.status}`);
+    const data = await res.json();
+
+    if (!res.ok || data.error) {
+      showError(data.error || "Something went wrong. Please try again.");
+      return;
     }
 
-    // Show card and add blinking cursor
+    jokeText.textContent = data.joke;
     jokeCard.hidden = false;
-    const cursor = document.createElement("span");
-    cursor.className = "cursor";
-    jokeText.appendChild(cursor);
-
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
-    let accumulatedText = "";
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop(); // keep incomplete line
-
-      for (const line of lines) {
-        if (!line.startsWith("data: ")) continue;
-        const payload = line.slice(6).trim();
-        if (payload === "[DONE]") break;
-
-        try {
-          const { text, error } = JSON.parse(payload);
-          if (error) {
-            showError(error);
-            jokeCard.hidden = true;
-            return;
-          }
-          if (text) {
-            accumulatedText += text;
-            // Insert text before the cursor
-            const textNode = document.createTextNode(text);
-            jokeText.insertBefore(textNode, cursor);
-          }
-        } catch {
-          // malformed JSON chunk — skip
-        }
-      }
-    }
-
-    cursor.remove();
   } catch (err) {
-    showError("Something went wrong. Make sure the server is running and your ANTHROPIC_API_KEY is set.");
-    jokeCard.hidden = true;
+    showError("Something went wrong. Make sure the server is running.");
   } finally {
     state.isGenerating = false;
     setGenerating(false);
