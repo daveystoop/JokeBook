@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JokeBook 📖</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="title-row">
+        <span class="book-emoji">📖</span>
+        <h1>JokeBook</h1>
+      </div>
+      <p class="subtitle">The world's finest dad joke generator</p>
+    </header>
+
+    <main>
+      <div class="controls-card">
+        <div class="control-group">
+          <label for="jokeType">
+            <span class="control-icon">🎭</span> Joke Type
+          </label>
+          <div class="pill-group" id="jokeType" role="group" aria-label="Joke type">
+            <button class="pill active" data-value="classic">Classic</button>
+            <button class="pill" data-value="pun">Pun</button>
+            <button class="pill" data-value="knock-knock">Knock-Knock</button>
+            <button class="pill" data-value="one-liner">One-Liner</button>
+            <button class="pill" data-value="question">Q &amp; A</button>
+            <button class="pill" data-value="groan-worthy">Groan-Worthy</button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label for="ageGroup">
+            <span class="control-icon">👥</span> Age Group
+          </label>
+          <div class="pill-group" id="ageGroup" role="group" aria-label="Age group">
+            <button class="pill" data-value="kids">Kids (5-8)</button>
+            <button class="pill" data-value="tweens">Tweens (9-12)</button>
+            <button class="pill" data-value="teens">Teens</button>
+            <button class="pill" data-value="adults">Adults</button>
+            <button class="pill active" data-value="all-ages">All Ages</button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label>
+            <span class="control-icon">📏</span> Length
+          </label>
+          <div class="length-slider-row">
+            <span class="length-label">Short</span>
+            <div class="length-track">
+              <div class="length-options">
+                <button class="length-dot" data-value="short" aria-label="Short"></button>
+                <button class="length-dot active" data-value="medium" aria-label="Medium"></button>
+                <button class="length-dot" data-value="long" aria-label="Long"></button>
+              </div>
+            </div>
+            <span class="length-label">Long</span>
+          </div>
+          <div class="length-value-display" id="lengthDisplay">Medium</div>
+        </div>
+      </div>
+
+      <button class="generate-btn" id="generateBtn">
+        <span class="btn-text">Tell Me a Joke!</span>
+        <span class="btn-spinner" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+          </svg>
+          Thinking...
+        </span>
+      </button>
+
+      <div class="joke-card" id="jokeCard" hidden>
+        <div class="joke-decoration" aria-hidden="true">😄</div>
+        <div class="joke-text" id="jokeText"></div>
+        <div class="joke-actions">
+          <button class="action-btn" id="copyBtn" title="Copy joke">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            Copy
+          </button>
+          <button class="action-btn" id="anotherBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="1 4 1 10 7 10"></polyline>
+              <path d="M3.51 15a9 9 0 1 0 .49-3.75"></path>
+            </svg>
+            Another
+          </button>
+        </div>
+      </div>
+
+      <div class="error-msg" id="errorMsg" hidden></div>
+    </main>
+
+    <footer>
+      <p>Powered by <strong>Claude</strong> · Guaranteed to make you groan</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
