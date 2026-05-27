@@ -16,7 +16,7 @@ export function Nav() {
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-40">
       <div className="max-w-5xl mx-auto px-4 flex items-center gap-1 h-14">
-        <Link href="/" className="font-bold text-indigo-700 text-lg mr-4">Barefoot Budget</Link>
+        <Link href="/" className="font-bold text-indigo-700 text-lg mr-4">Savvy</Link>
         {links.map((l) => (
           <Link
             key={l.href}

@@ -1,7 +1,7 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenAI } from "@google/genai";
 import type { DealResult } from "@/types";
 
-const client = new Anthropic();
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY ?? "" });
 
 export async function findDealsForBill(bill: {
   name: string;
@@ -36,13 +36,12 @@ Return ONLY a valid JSON array with no markdown, no code blocks, just the raw JS
 Only include deals that would actually save money. If no real alternatives exist, return an empty array [].`;
 
   try {
-    const message = await client.messages.create({
-      model: "claude-sonnet-4-6",
-      max_tokens: 1024,
-      messages: [{ role: "user", content: prompt }],
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: prompt,
     });
 
-    const text = message.content[0].type === "text" ? message.content[0].text : "";
+    const text = response.text ?? "";
     const cleaned = text.trim().replace(/^```json\n?/, "").replace(/\n?```$/, "");
     const deals: DealResult[] = JSON.parse(cleaned);
     return Array.isArray(deals) ? deals : [];

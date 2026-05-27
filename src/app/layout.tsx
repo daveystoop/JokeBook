@@ -3,7 +3,7 @@ import "./globals.css";
 import { Nav } from "@/components/Nav";
 
 export const metadata: Metadata = {
-  title: "Barefoot Budget",
+  title: "Savvy",
   description: "Your personal CFO — audit bills, find better deals, and reclaim your money.",
 };
 
