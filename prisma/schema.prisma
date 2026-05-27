@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Bill {
+  id            String    @id @default(cuid())
+  name          String
+  provider      String
+  category      String
+  monthlyAmount Float
+  planDetails   String?
+  contractEnds  DateTime?
+  accountNumber String?
+  phoneNumber   String?
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deals         Deal[]
+  actions       Action[]
+}
+
+model Deal {
+  id            String   @id @default(cuid())
+  billId        String
+  bill          Bill     @relation(fields: [billId], references: [id], onDelete: Cascade)
+  provider      String
+  planDetails   String
+  monthlyAmount Float
+  promoAmount   Float?
+  promoDuration Int?
+  annualSaving  Float
+  sourceNote    String?
+  foundAt       DateTime @default(now())
+  reviewId      String?
+}
+
+model Action {
+  id           String    @id @default(cuid())
+  billId       String
+  bill         Bill      @relation(fields: [billId], references: [id], onDelete: Cascade)
+  dealId       String?
+  status       String    @default("pending")
+  commitBy     DateTime?
+  monthlySaving Float
+  annualSaving  Float
+  method       String?
+  draftEmail   String?
+  completedAt  DateTime?
+  createdAt    DateTime  @default(now())
+}
+
+model Review {
+  id               String   @id @default(cuid())
+  runAt            DateTime @default(now())
+  totalSavingFound Float
+  dealsFound       Int
+  summary          String?
+}
+
+model Profile {
+  id           String   @id @default(cuid())
+  name         String
+  address      String?
+  email        String?
+  mortgageBank String?
+  mortgageRate Float?
+  createdAt    DateTime @default(now())
+}
