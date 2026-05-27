@@ -113,10 +113,16 @@ export default function Dashboard() {
         </div>
         {bills.length === 0 ? (
           <div className="px-5 py-10 text-center">
-            <p className="text-gray-500 mb-3">No bills added yet.</p>
-            <Link href="/bills/new" className="inline-block px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700">
-              Add your first bill
-            </Link>
+            <p className="text-gray-500 mb-1">No bills yet.</p>
+            <p className="text-sm text-gray-400 mb-4">Upload your bank transactions and we&apos;ll find them automatically.</p>
+            <div className="flex gap-3 justify-center">
+              <Link href="/audit" className="inline-block px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700">
+                Run financial audit →
+              </Link>
+              <Link href="/bills/new" className="inline-block px-4 py-2 border border-gray-300 text-gray-600 text-sm font-medium rounded-lg hover:bg-gray-50">
+                Add manually
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
@@ -147,8 +153,8 @@ export default function Dashboard() {
 
       {bills.length > 0 && (
         <div className="flex gap-3">
-          <Link href="/review" className="px-5 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-colors">
-            Run monthly review →
+          <Link href="/audit" className="px-5 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-colors">
+            Run financial audit →
           </Link>
           <Link href="/bills/new" className="px-5 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors">
             Add bill

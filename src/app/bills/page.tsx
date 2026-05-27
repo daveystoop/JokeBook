@@ -10,6 +10,7 @@ interface Bill {
   provider: string;
   category: string;
   monthlyAmount: number;
+  source: string;
   deals: { annualSaving: number }[];
   actions: { id: string; status: string }[];
 }
@@ -82,10 +83,15 @@ export default function BillsPage() {
         </div>
       ) : bills.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-xl p-12 text-center">
-          <p className="text-gray-500 mb-4">No bills added yet. Start by adding your recurring expenses.</p>
-          <Link href="/bills/new" className="inline-block px-5 py-2.5 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700">
-            Add your first bill
-          </Link>
+          <p className="text-gray-500 mb-4">No bills yet. Upload your transactions for an automatic audit, or add bills manually.</p>
+          <div className="flex gap-3 justify-center">
+            <Link href="/audit" className="inline-block px-5 py-2.5 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700">
+              Run financial audit →
+            </Link>
+            <Link href="/bills/new" className="inline-block px-5 py-2.5 border border-gray-300 text-gray-600 font-medium rounded-lg hover:bg-gray-50">
+              Add manually
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
@@ -106,7 +112,12 @@ export default function BillsPage() {
                 return (
                   <tr key={bill.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-5 py-4">
-                      <Link href={`/bills/${bill.id}`} className="font-medium text-indigo-700 hover:underline">{bill.name}</Link>
+                      <div className="flex items-center gap-2">
+                        <Link href={`/bills/${bill.id}`} className="font-medium text-indigo-700 hover:underline">{bill.name}</Link>
+                        {bill.source === "detected" && (
+                          <span className="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-medium">auto</span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-5 py-4 text-sm text-gray-500">{categoryLabel(bill.category)}</td>
                     <td className="px-5 py-4 text-sm text-gray-600">{bill.provider}</td>
