@@ -37,7 +37,7 @@ Only include deals that would actually save money. If no real alternatives exist
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-flash-latest",
       contents: prompt,
     });
 
